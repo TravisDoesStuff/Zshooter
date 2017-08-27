@@ -1,0 +1,206 @@
+<html>
+<head>
+  <style>
+  html, body{
+    background-color: black;
+    color: rgb(0,255,0);
+    font-family: 'Courier New';
+    user-select: none;
+    text-shadow: 0 0 3px #00FF00;
+  }
+  canvas{
+    border: 2px solid rgb(0,255,0);
+  }
+  #hud{
+    width: 484px;
+    height: 40px;
+    padding: 10px;
+  }
+  #health{
+    color: rgb(255,0,0);
+    text-shadow: 0 0 3px #FF0000;
+  }
+  #armor{
+    color: rgb(255,255,255);
+    text-shadow: 0 0 3px #FFFFFF;
+  }
+  </style>
+</head>
+<body>
+  <canvas id='gameScreen' width='500px' height='500px'></canvas>
+  <div id='hud'>
+    <div id='hudLeft' style='width: 250px; display: inline-block;'>
+      <label>Health: </label><span id='health'>100</span>
+      <br>
+      <label>Armor: </label><span id='armor'>0</span>
+    </div>
+    <div id='hudRight' style='width: 250px; display: inline-block;'>
+      <label id='gunName'>Pistol</label> | <span id='ammo'>17</span>
+    </div>
+  </div>
+
+  <br><br>
+
+  <div id='debug'>
+    Mouse: <span id='mouseX'>0</span>,<span id='mouseY'>0</span>
+  </div>
+
+</body>
+</html>
+
+<script>
+  var moveUp = false;
+  var moveDown = false;
+  var moveRight = false;
+  var moveLeft = false;
+
+  var playerX = 250;
+  var playerY = 250;
+
+  var mouseX = 0;
+  var mouseY = 0
+
+  var gun = 'Pistol';
+  var ammo = 17;
+
+  document.addEventListener("keydown", keyDownHandler, false);
+  document.addEventListener("keyup", keyUpHandler, false);
+
+  var gameScreen = document.getElementById('gameScreen');
+  var ctx = gameScreen.getContext('2d');
+  gameScreen.addEventListener("click", clickHandler, false);
+  gameScreen.addEventListener("mousemove", mouseMoveHandler, false);
+
+  draw();
+
+  setInterval(draw, 10);
+
+  function draw(){
+    var gameScreen = document.getElementById('gameScreen');
+    var ctx = gameScreen.getContext('2d');
+
+    ctx.clearRect(0, 0, gameScreen.width, gameScreen.height);
+
+    drawEnvrionment();
+    drawPlayer();
+  }
+
+  function drawEnvrionment(){
+    var gameScreen = document.getElementById('gameScreen');
+    var ctx = gameScreen.getContext('2d');
+
+    ctx.fillStyle = "rgb(0,50,0)";
+    ctx.fillRect(0,0,500,500);
+
+    ctx.fillStyle = "rgb(0,100,0)";
+    ctx.fillRect(100,100,50,50);
+  }
+
+  function drawPlayer(){
+    var gameScreen = document.getElementById('gameScreen');
+    var ctx = gameScreen.getContext('2d');
+
+    if(moveUp) playerY--;
+    if(moveDown) playerY++;
+    if(moveLeft) playerX--;
+    if(moveRight) playerX++;
+
+    ctx.strokeStyle = "white";
+    ctx.lineWidth=2;
+    ctx.strokeRect(playerX,playerY,15,15);
+  }
+
+  function keyDownHandler(e){
+    if(e.keyCode == 87) {
+      moveUp = true;
+    } else if(e.keyCode == 83)  {
+      moveDown = true;
+    } else if(e.keyCode == 65) {
+      moveLeft = true;
+    } else if(e.keyCode == 68) {
+      moveRight = true;
+    } else if(e.keyCode == 49) {
+      gun = "Pistol";
+      ammo = 17;
+    } else if(e.keyCode == 50) {
+      gun = "Shotgun";
+      ammo = 8;
+    } else if(e.keyCode == 51) {
+      gun = "Assault Rifle";
+      ammo = 30;
+    } else if(e.keyCode == 52) {
+      gun = "Rocket Launcher";
+      ammo = 1;
+    }
+
+    document.getElementById('gunName').innerHTML = gun;
+    document.getElementById('ammo').innerHTML = ammo;
+  }
+
+  function keyUpHandler(e){
+    if(e.keyCode == 87) {
+      moveUp = false;
+    } else if(e.keyCode == 83)  {
+      moveDown = false;
+    } else if(e.keyCode == 65) {
+      moveLeft = false;
+    } else if(e.keyCode == 68) {
+      moveRight = false;
+    }
+  }
+
+  function clickHandler(e){
+    shoot();
+  }
+
+  function mouseMoveHandler(e){
+    mouseX = e.x;
+    mouseY = e.y;
+
+    document.getElementById('mouseX').innerHTML = mouseX;
+    document.getElementById('mouseY').innerHTML = mouseY;
+  }
+
+  function shoot(){
+    if(ammo <= 0){
+      var audio = new Audio('sounds/empty.wav');
+      audio.play();
+    } else {
+      if(gun == 'Pistol') {
+        pistolShot();
+      } else if(gun == 'Shotgun') {
+        var audio = new Audio('sounds/SGFIRE.wav');
+        audio.play();
+      } else if(gun == 'Assault Rifle') {
+        var audio = new Audio('sounds/DSRIFL1.ogg');
+        audio.play();
+      } else if(gun == "Rocket Launcher") {
+        var audio = new Audio('sounds/RLFIRE.ogg');
+        audio.play();
+      }
+      ammo--;
+    }
+
+    document.getElementById('ammo').innerHTML = ammo;
+  }
+
+  function pistolShot(){
+    var gameScreen = document.getElementById('gameScreen');
+    var ctx = gameScreen.getContext('2d');
+
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255,155,0,1)';
+    ctx.lineWidth=2;
+    ctx.moveTo(playerX+7, playerY+7);
+    ctx.lineTo(mouseX, mouseY);
+    ctx.stroke();
+
+    var audio = new Audio('sounds/MP40.ogg');
+    audio.play();
+  }
+
+  function rocketShot(){
+    var gameScreen = document.getElementById('gameScreen');
+    var ctx = gameScreen.getContext('2d');
+  }
+</script>
