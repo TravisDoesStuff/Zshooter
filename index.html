@@ -7,9 +7,11 @@
     font-family: 'Courier New';
     user-select: none;
     text-shadow: 0 0 3px #00FF00;
+    cursor: crosshair;
   }
   canvas{
     border: 2px solid rgb(0,255,0);
+    box-shadow: 0 0 3px #00FF00;
   }
   #hud{
     width: 484px;
@@ -42,7 +44,11 @@
   <br><br>
 
   <div id='debug'>
+    Player: <span id='playerX'>0</span>,<span id='playerY'>0</span>
+    <br>
     Mouse: <span id='mouseX'>0</span>,<span id='mouseY'>0</span>
+    <br>
+    HitScan: <span id='projectileX'>0</span>,<span id='projectileY'>0</span>
   </div>
 
 </body>
@@ -62,6 +68,10 @@
 
   var gun = 'Pistol';
   var ammo = 17;
+
+  var shot = false;
+  var bulletX = 0;
+  var bulletX = 0;
 
   document.addEventListener("keydown", keyDownHandler, false);
   document.addEventListener("keyup", keyUpHandler, false);
@@ -83,6 +93,10 @@
 
     drawEnvrionment();
     drawPlayer();
+
+    if(shot){
+      drawBullet();
+    }
   }
 
   function drawEnvrionment(){
@@ -108,6 +122,22 @@
     ctx.strokeStyle = "white";
     ctx.lineWidth=2;
     ctx.strokeRect(playerX,playerY,15,15);
+
+    document.getElementById('playerX').innerHTML = playerX;
+    document.getElementById('playerY').innerHTML = playerY;
+
+    hitScan();
+  }
+
+  function drawBullet(){
+    var gameScreen = document.getElementById('gameScreen');
+    var ctx = gameScreen.getContext('2d');
+
+    ctx.beginPath();
+    ctx.arc(bulletX, bulletY, 1, 0, 2*Math.PI);
+    ctx.fillStyle = 'yellow';
+    ctx.fill();
+    ctx.stroke();
   }
 
   function keyDownHandler(e){
@@ -172,8 +202,7 @@
         var audio = new Audio('sounds/SGFIRE.wav');
         audio.play();
       } else if(gun == 'Assault Rifle') {
-        var audio = new Audio('sounds/DSRIFL1.ogg');
-        audio.play();
+        rifleShot();
       } else if(gun == "Rocket Launcher") {
         var audio = new Audio('sounds/RLFIRE.ogg');
         audio.play();
@@ -192,15 +221,49 @@
     ctx.strokeStyle = 'rgba(255,155,0,1)';
     ctx.lineWidth=2;
     ctx.moveTo(playerX+7, playerY+7);
-    ctx.lineTo(mouseX, mouseY);
+    // ctx.lineTo();
     ctx.stroke();
 
     var audio = new Audio('sounds/MP40.ogg');
     audio.play();
   }
 
+  function rifleShot(){
+    var audio = new Audio('sounds/DSRIFL1.ogg');
+    audio.play();
+
+    shot = true;
+    bulletX = mouseX;
+    bulletY = mouseY;
+    console.log('called');
+  }
+
   function rocketShot(){
     var gameScreen = document.getElementById('gameScreen');
     var ctx = gameScreen.getContext('2d');
+  }
+
+  function hitScan(){
+    var gameScreen = document.getElementById('gameScreen');
+    var ctx = gameScreen.getContext('2d');
+
+    var playerCenterX = playerX+7;
+    var playerCenterY = playerY+7;
+
+    var projectileX = playerCenterX
+    var projectileY = playerCenterY;
+
+    projectileX += mouseX-playerCenterX;
+    projectileY += mouseY-playerCenterY;
+
+    document.getElementById('projectileX').innerHTML = projectileX;
+    document.getElementById('projectileY').innerHTML = projectileY;
+
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255,155,0,1)';
+    ctx.lineWidth=2;
+    ctx.moveTo(playerCenterX,playerCenterY);
+    ctx.lineTo(projectileX-10,projectileY-10);
+    ctx.stroke();
   }
 </script>
