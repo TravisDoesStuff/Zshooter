@@ -1,0 +1,25 @@
+html, body{
+  background-color: black;
+  color: rgb(0,255,0);
+  font-family: 'Courier New';
+  user-select: none;
+  text-shadow: 0 0 3px #00FF00;
+}
+canvas{
+  border: 2px solid rgb(0,255,0);
+  box-shadow: 0 0 3px #00FF00;
+  cursor: crosshair;
+}
+#hud{
+  width: 484px;
+  height: 40px;
+  padding: 10px;
+}
+#health{
+  color: rgb(255,0,0);
+  text-shadow: 0 0 3px #FF0000;
+}
+#armor{
+  color: rgb(255,255,255);
+  text-shadow: 0 0 3px #FFFFFF;
+}

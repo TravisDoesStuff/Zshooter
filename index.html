@@ -1,32 +1,8 @@
+<!DOCTYPE html>
 <html>
 <head>
-  <style>
-  html, body{
-    background-color: black;
-    color: rgb(0,255,0);
-    font-family: 'Courier New';
-    user-select: none;
-    text-shadow: 0 0 3px #00FF00;
-    cursor: crosshair;
-  }
-  canvas{
-    border: 2px solid rgb(0,255,0);
-    box-shadow: 0 0 3px #00FF00;
-  }
-  #hud{
-    width: 484px;
-    height: 40px;
-    padding: 10px;
-  }
-  #health{
-    color: rgb(255,0,0);
-    text-shadow: 0 0 3px #FF0000;
-  }
-  #armor{
-    color: rgb(255,255,255);
-    text-shadow: 0 0 3px #FFFFFF;
-  }
-  </style>
+  <title>Zshooter</title>
+  <link rel="stylesheet" type="text/css" href="style.css"></link>
 </head>
 <body>
   <canvas id='gameScreen' width='500px' height='500px'></canvas>
@@ -44,11 +20,11 @@
   <br><br>
 
   <div id='debug'>
-    Player: <span id='playerX'>0</span>,<span id='playerY'>0</span>
+    Player: <span id='playerX'>0</span>,<span id='playerY'>0</span>,<span id='playerZ'>0</span>
     <br>
     Mouse: <span id='mouseX'>0</span>,<span id='mouseY'>0</span>
     <br>
-    HitScan: <span id='projectileX'>0</span>,<span id='projectileY'>0</span>
+    Next: <span id='nextData'>0</span>
   </div>
 
 </body>
@@ -59,19 +35,17 @@
   var moveDown = false;
   var moveRight = false;
   var moveLeft = false;
+  var run = false;
 
   var playerX = 250;
   var playerY = 250;
+  var playerZ = 100;
 
   var mouseX = 0;
   var mouseY = 0
 
   var gun = 'Pistol';
   var ammo = 17;
-
-  var shot = false;
-  var bulletX = 0;
-  var bulletX = 0;
 
   document.addEventListener("keydown", keyDownHandler, false);
   document.addEventListener("keyup", keyUpHandler, false);
@@ -81,63 +55,99 @@
   gameScreen.addEventListener("click", clickHandler, false);
   gameScreen.addEventListener("mousemove", mouseMoveHandler, false);
 
-  draw();
-
   setInterval(draw, 10);
 
   function draw(){
-    var gameScreen = document.getElementById('gameScreen');
-    var ctx = gameScreen.getContext('2d');
-
     ctx.clearRect(0, 0, gameScreen.width, gameScreen.height);
 
     drawEnvrionment();
     drawPlayer();
-
-    if(shot){
-      drawBullet();
-    }
   }
 
   function drawEnvrionment(){
-    var gameScreen = document.getElementById('gameScreen');
-    var ctx = gameScreen.getContext('2d');
-
     ctx.fillStyle = "rgb(0,50,0)";
     ctx.fillRect(0,0,500,500);
 
     ctx.fillStyle = "rgb(0,100,0)";
     ctx.fillRect(100,100,50,50);
+
+    ctx.fillStyle = "rgb(0,55,0)";
+    ctx.fillRect(300,300,50,10);
+    ctx.fillStyle = "rgb(0,60,0)";
+    ctx.fillRect(300,310,50,10);
+    ctx.fillStyle = "rgb(0,65,0)";
+    ctx.fillRect(300,320,50,10);
+    ctx.fillStyle = "rgb(0,70,0)";
+    ctx.fillRect(300,330,50,10);
+    ctx.fillStyle = "rgb(0,75,0)";
+    ctx.fillRect(300,340,50,10);
+    ctx.fillStyle = "rgb(0,80,0)";
+    ctx.fillRect(300,350,50,10);
+    ctx.fillStyle = "rgb(0,85,0)";
+    ctx.fillRect(300,360,50,10);
+    ctx.fillStyle = "rgb(0,90,0)";
+    ctx.fillRect(300,370,50,10);
+    ctx.fillStyle = "rgb(0,95,0)";
+    ctx.fillRect(300,380,50,10);
+    ctx.fillStyle = "rgb(0,100,0)";
+    ctx.fillRect(300,390,50,10);
+
+    ctx.fillStyle = "rgb(0,100,0)";
+    ctx.fillRect(100,390,300,100);
+
+    ctx.fillStyle = "rgb(0,255,0)";
+    ctx.fillRect(100,390,200,5);
+    ctx.fillStyle = "rgb(0,255,0)";
+    ctx.fillRect(100,390,5,100);
+    ctx.fillStyle = "rgb(0,255,0)";
+    ctx.fillRect(100,490,300,5);
+    ctx.fillStyle = "rgb(0,255,0)";
+    ctx.fillRect(350,390,50,5);
+    ctx.fillStyle = "rgb(0,255,0)";
+    ctx.fillRect(400,390,5,105);
   }
 
   function drawPlayer(){
-    var gameScreen = document.getElementById('gameScreen');
-    var ctx = gameScreen.getContext('2d');
-
-    if(moveUp) playerY--;
-    if(moveDown) playerY++;
-    if(moveLeft) playerX--;
-    if(moveRight) playerX++;
+    movePlayer();
 
     ctx.strokeStyle = "white";
     ctx.lineWidth=2;
-    ctx.strokeRect(playerX,playerY,15,15);
+    ctx.strokeRect(playerX,playerY,14,14);
+
+    ctx.beginPath();
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth=2;
+    ctx.moveTo(playerX+7, playerY+7);
+    ctx.lineTo(playerX+7, playerY-7);
+    ctx.stroke();
 
     document.getElementById('playerX').innerHTML = playerX;
     document.getElementById('playerY').innerHTML = playerY;
-
-    hitScan();
+    document.getElementById('playerZ').innerHTML = playerZ;
   }
 
-  function drawBullet(){
-    var gameScreen = document.getElementById('gameScreen');
-    var ctx = gameScreen.getContext('2d');
+  function movePlayer(){
+    var moveSpeed = run ? 2 : 1;
 
-    ctx.beginPath();
-    ctx.arc(bulletX, bulletY, 1, 0, 2*Math.PI);
-    ctx.fillStyle = 'yellow';
-    ctx.fill();
-    ctx.stroke();
+    var imageData = ctx.getImageData(playerX+7, playerY+7, 1, 1).data;
+    document.getElementById('nextData').innerHTML = imageData[1];
+    if((imageData[1]-playerZ) < 10) {
+      if(moveUp) playerY -= moveSpeed;
+      if(moveDown) playerY += moveSpeed;
+      if(moveLeft) playerX -= moveSpeed;
+      if(moveRight) playerX += moveSpeed;
+
+      playerZ = imageData[1];
+    } else {
+      if(moveUp) playerY += moveSpeed;
+      if(moveDown) playerY -= moveSpeed;
+      if(moveLeft) playerX += moveSpeed;
+      if(moveRight) playerX -= moveSpeed;
+    }
+  }
+
+  function collisionHandler(){
+
   }
 
   function keyDownHandler(e){
@@ -149,6 +159,8 @@
       moveLeft = true;
     } else if(e.keyCode == 68) {
       moveRight = true;
+    } else if(e.keyCode == 16) {
+      run = true;
     } else if(e.keyCode == 49) {
       gun = "Pistol";
       ammo = 17;
@@ -176,6 +188,8 @@
       moveLeft = false;
     } else if(e.keyCode == 68) {
       moveRight = false;
+    } else if(e.keyCode = 16) {
+      run = false;
     }
   }
 
@@ -199,13 +213,11 @@
       if(gun == 'Pistol') {
         pistolShot();
       } else if(gun == 'Shotgun') {
-        var audio = new Audio('sounds/SGFIRE.wav');
-        audio.play();
+        shotgunShot();
       } else if(gun == 'Assault Rifle') {
         rifleShot();
       } else if(gun == "Rocket Launcher") {
-        var audio = new Audio('sounds/RLFIRE.ogg');
-        audio.play();
+        rocketShot();
       }
       ammo--;
     }
@@ -214,56 +226,22 @@
   }
 
   function pistolShot(){
-    var gameScreen = document.getElementById('gameScreen');
-    var ctx = gameScreen.getContext('2d');
-
-    ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255,155,0,1)';
-    ctx.lineWidth=2;
-    ctx.moveTo(playerX+7, playerY+7);
-    // ctx.lineTo();
-    ctx.stroke();
-
     var audio = new Audio('sounds/MP40.ogg');
+    audio.play();
+  }
+
+  function shotgunShot(){
+    var audio = new Audio('sounds/SGFIRE.wav');
     audio.play();
   }
 
   function rifleShot(){
     var audio = new Audio('sounds/DSRIFL1.ogg');
     audio.play();
-
-    shot = true;
-    bulletX = mouseX;
-    bulletY = mouseY;
-    console.log('called');
   }
 
   function rocketShot(){
-    var gameScreen = document.getElementById('gameScreen');
-    var ctx = gameScreen.getContext('2d');
-  }
-
-  function hitScan(){
-    var gameScreen = document.getElementById('gameScreen');
-    var ctx = gameScreen.getContext('2d');
-
-    var playerCenterX = playerX+7;
-    var playerCenterY = playerY+7;
-
-    var projectileX = playerCenterX
-    var projectileY = playerCenterY;
-
-    projectileX += mouseX-playerCenterX;
-    projectileY += mouseY-playerCenterY;
-
-    document.getElementById('projectileX').innerHTML = projectileX;
-    document.getElementById('projectileY').innerHTML = projectileY;
-
-    ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255,155,0,1)';
-    ctx.lineWidth=2;
-    ctx.moveTo(playerCenterX,playerCenterY);
-    ctx.lineTo(projectileX-10,projectileY-10);
-    ctx.stroke();
+    var audio = new Audio('sounds/RLFIRE.ogg');
+    audio.play();
   }
 </script>
